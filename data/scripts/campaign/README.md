@@ -9,9 +9,9 @@ of the implementation roadmap), built on top of TFS's revscriptsys
 
 | File | System | GDD Section |
 |---|---|---|
-| `lib/campaign_config.lua` | Shared config/data tables for all systems below | - |
+| `../lib/campaign_config.lua` (`data/scripts/lib/`) | Shared config/data tables for all systems below | - |
 | `globalevents/hunger_tick.lua` | Hunger state machine (Fed/Hungry/Starving/Exhausted) | 4 |
-| `lib/skill_gain_block.lua` | Pauses skill gain while hungry | 4 |
+| `../lib/skill_gain_block.lua` (`data/scripts/lib/`) | Pauses skill gain while hungry | 4 |
 | `actions/eat_food.lua` | Eating food restores food ticks | 4, 7 |
 | `creaturescripts/campaign_login.lua` | Initializes hunger storage on login | 4 |
 | `actions/repair.lua` | Repairing equipment at an anvil | 5 |
@@ -139,12 +139,16 @@ A simple "auto boss" loop built on the same world-global storage pattern:
 
 ## Load order
 
-`lib/campaign_config.lua` must be loaded before every other file in this
-folder, since `CampaignConfig` is a global table they all read from. TFS's
-script loader generally loads `data/scripts/lib/**` first; if your engine
-build loads folders strictly alphabetically, move `campaign_config.lua` and
-`skill_gain_block.lua` into the engine's existing `lib/` folder instead of
-`campaign/lib/`.
+`CampaignConfig` is a global table every other file in this folder reads
+from, so `campaign_config.lua` (and `skill_gain_block.lua`, which also reads
+it at load time) must be loaded first. Verified against this fork's
+`src/script.cpp`: `Scripts::loadScripts("scripts", false, false)` **skips any
+directory literally named `lib`**, and the separate lib pass
+(`loadScripts("scripts/lib", true, false)`) only scans `data/scripts/lib/`,
+not arbitrary `lib/` subfolders. A `campaign/lib/` folder would therefore
+never be loaded at all. Both files live directly in `data/scripts/lib/`
+(alongside the engine's own libs) for this reason - **do not** move them back
+under `campaign/`.
 
 ## Known engine-version caveats
 
@@ -154,8 +158,8 @@ These scripts were written against the common TFS 1.x revscriptsys API
 engine commit used for the campaign server (this repo's `server` submodule,
 forked at `OldSchoolRPG/forgottenserver`):
 
-1. **`EventCallback.onGainSkillTries`** (`lib/skill_gain_block.lua`) - confirm
-   the callback name/signature in `data/scripts/lib/event_callbacks.lua`.
+1. **`EventCallback.onGainSkillTries`** (`data/scripts/lib/skill_gain_block.lua`) -
+   confirm the callback name/signature in `data/scripts/lib/event_callbacks.lua`.
 2. **`CreatureEvent:type("death")` / `type("login")`** (`creaturescripts/*`) -
    confirm whether these need to be registered per-player/monster via the
    default registration scripts, or fire globally out of the box.
