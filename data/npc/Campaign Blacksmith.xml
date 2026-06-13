@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- World Map Design (GDD section 15): Blacksmith / Forge.
+     `look` values are placeholder Worker-type outfits until the campaign
+     defines its own NPC sprites. -->
+<npc name="Blacksmith" script="campaign/blacksmith.lua" walkinterval="2000" floorchange="0">
+	<health now="100" max="100" />
+	<look type="143" head="78" body="20" legs="76" feet="115" addons="0" />
+</npc>
