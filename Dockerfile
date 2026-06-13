@@ -25,14 +25,17 @@ RUN apk add --no-cache \
   fmt \
   luajit \
   mariadb-connector-c \
+  mariadb-client \
   openssl \
   pugixml
 
 COPY --from=build /usr/src/forgottenserver/build/RelWithDebInfo/tfs /bin/tfs
 COPY data /srv/data/
 COPY LICENSE README.md *.dist *.sql key.pem /srv/
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 7171 7172
 WORKDIR /srv
 VOLUME /srv
-ENTRYPOINT ["/bin/tfs"]
+ENTRYPOINT ["docker-entrypoint.sh"]
