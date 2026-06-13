@@ -1165,4 +1165,10 @@
 	<monster name="Zugurosh" file="monsters/zugurosh.xml" />
 	<monster name="Zulazza The Corruptor" file="monsters/zulazza_the_corruptor.xml" />
 	<monster name="Zushuka" file="monsters/zushuka.xml" />
+
+	<!-- Campaign MVP additions (docs/GDD-CoreSystems.md) -->
+	<monster name="Skeleton Rat" file="monsters/skeleton_rat.xml" />
+	<monster name="Troll Bones" file="monsters/troll_bones.xml" />
+	<monster name="Player Shade" file="monsters/player_shade.xml" />
+	<monster name="Familiar" file="monsters/familiar.xml" />
 </monsters>
