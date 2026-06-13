@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- World Map Design (GDD section 15): Library / Librarian.
+     `look` values are placeholder Scholar-type outfits until the campaign
+     defines its own NPC sprites. -->
+<npc name="Librarian" script="campaign/librarian.lua" walkinterval="2000" floorchange="0">
+	<health now="100" max="100" />
+	<look type="130" head="78" body="114" legs="39" feet="115" addons="0" />
+</npc>
