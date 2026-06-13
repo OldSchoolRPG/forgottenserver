@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- World Map Design (GDD section 15): Temple / Cleric.
+     `look` values are placeholder Healer-type outfits until the campaign
+     defines its own NPC sprites. -->
+<npc name="Cleric" script="campaign/cleric.lua" walkinterval="2000" floorchange="0">
+	<health now="100" max="100" />
+	<look type="141" head="95" body="94" legs="94" feet="115" addons="0" />
+</npc>
