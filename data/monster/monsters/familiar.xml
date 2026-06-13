@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Magic System (GDD section 3): summoned by the "Summon Familiar" grimoire
+     spell (data/scripts/spells/conjuring/summon_familiar.lua). Friendly to
+     its summoner via Creature:setMaster(). `look type` reuses the built-in
+     Fire Elemental-ish small creature id (33) as a placeholder until a
+     dedicated "familiar" sprite is added to the client. -->
+<monster name="Familiar" nameDescription="a familiar spirit" race="energy" experience="0" speed="180" manacost="0" raceId="0">
+	<health now="60" max="60" />
+	<look type="33" corpse="0" />
+	<targetchange interval="4000" chance="0" />
+	<flags>
+		<flag summonable="1" />
+		<flag attackable="1" />
+		<flag hostile="0" />
+		<flag illusionable="0" />
+		<flag convinceable="0" />
+		<flag pushable="1" />
+		<flag canpushitems="0" />
+		<flag canpushcreatures="1" />
+		<flag targetdistance="1" />
+		<flag staticattack="90" />
+		<flag runonhealth="0" />
+		<flag canwalkonenergy="1" />
+		<flag canwalkonfire="0" />
+		<flag canwalkonpoison="0" />
+		<flag isidle="1" />
+	</flags>
+	<attacks>
+		<attack name="energy" interval="2000" chance="50" range="3" min="-5" max="-15">
+			<attribute key="shootEffect" value="energy" />
+		</attack>
+	</attacks>
+	<defenses armor="3" defense="5" />
+	<elements>
+		<element energyPercent="50" />
+	</elements>
+	<voices interval="8000" chance="10">
+		<voice sentence="*hums*" />
+	</voices>
+	<loot>
+	</loot>
+</monster>
