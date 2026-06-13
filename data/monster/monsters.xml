@@ -1171,4 +1171,5 @@
 	<monster name="Troll Bones" file="monsters/troll_bones.xml" />
 	<monster name="Player Shade" file="monsters/player_shade.xml" />
 	<monster name="Familiar" file="monsters/familiar.xml" />
+	<monster name="Grakthar the Bonecaller" file="monsters/grakthar_the_bonecaller.xml" />
 </monsters>
