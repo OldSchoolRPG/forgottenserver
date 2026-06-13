@@ -22,21 +22,30 @@ CampaignConfig = {
 	},
 
 	-- Grimoires: itemId -> { spell = "Spell Name", minMagicLevel = X, minLiteracy = Y }
+	-- "Antidote" and "Mass Healing" / "Fireball" / "Summon Familiar" are taught
+	-- as the *actual* registered spell names below (see
+	-- data/scripts/spells/{attack,healing,conjuring}/ for the new ones, and
+	-- data/scripts/spells/healing/cure_poison.lua for the built-in one).
 	grimoires = {
 		[8914] = { spell = "Light", minMagicLevel = 0, minLiteracy = 0 },
-		[8915] = { spell = "Antidote", minMagicLevel = 2, minLiteracy = 1 },
+		[8915] = { spell = "Cure Poison", minMagicLevel = 2, minLiteracy = 1 }, -- "Antidote" grimoire
 		[8916] = { spell = "Fireball", minMagicLevel = 5, minLiteracy = 2 },
 		[8917] = { spell = "Mass Healing", minMagicLevel = 10, minLiteracy = 3 },
 		[8918] = { spell = "Summon Familiar", minMagicLevel = 15, minLiteracy = 4 },
 	},
 
-	-- Rune crafting: blank rune item id -> charged rune item id produced.
-	-- Requires the player to have learned the matching spell via a grimoire.
+	-- Rune crafting: spell name (must be a spell the player has learned via a
+	-- grimoire) -> charged rune produced by "!inscribe <Spell Name>".
+	-- All runeIds below are real, already-registered rune items/spells in the
+	-- engine (data/scripts/runes/), so inscribed runes work out of the box:
+	--   2266 = Cure Poison Rune, 2302 = Fireball Rune, 2273 = Ultimate Healing Rune
+	-- blankRuneId 2260 is the item created by the built-in "Blank Rune" spell
+	-- (data/scripts/spells/conjuring/blank_rune.lua).
 	runeCrafting = {
-		blankRuneId = 16125,
+		blankRuneId = 2260,
 		recipes = {
-			["Antidote"] = { runeId = 2273, manaCost = 200, baseCharges = 1, chargesPerMagicLevel = 5 },
-			["Fireball"] = { runeId = 2304, manaCost = 600, baseCharges = 1, chargesPerMagicLevel = 8 },
+			["Cure Poison"] = { runeId = 2266, manaCost = 200, baseCharges = 1, chargesPerMagicLevel = 5 },
+			["Fireball"] = { runeId = 2302, manaCost = 600, baseCharges = 1, chargesPerMagicLevel = 8 },
 			["Mass Healing"] = { runeId = 2273, manaCost = 1200, baseCharges = 1, chargesPerMagicLevel = 10 },
 		},
 	},
@@ -62,10 +71,12 @@ CampaignConfig = {
 	-- Corpse & Undead system
 	corpse = {
 		-- corpse itemId -> { undeadName = "monster name in monsters/", riseAfter = seconds }
+		-- IDs match the corpse drops of the engine's built-in Rat, Troll and
+		-- Bandit monsters, so killing those creatures feeds this system.
 		rules = {
-			[2853] = { undeadName = "Skeleton Rat", riseAfter = 240 }, -- rat corpse
-			[2859] = { undeadName = "Skeleton", riseAfter = 300 }, -- human corpse
-			[2862] = { undeadName = "Troll Bones", riseAfter = 300 }, -- troll corpse
+			[5964] = { undeadName = "Skeleton Rat", riseAfter = 240 }, -- rat corpse
+			[20331] = { undeadName = "Skeleton", riseAfter = 300 }, -- human/bandit corpse
+			[5960] = { undeadName = "Troll Bones", riseAfter = 300 }, -- troll corpse
 		},
 		-- item attribute key (string) set on the corpse once it has been burned
 		burnedAttribute = "campaign_burned",
