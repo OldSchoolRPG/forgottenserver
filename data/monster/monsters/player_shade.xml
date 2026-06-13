@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Death & Permadeath System (GDD section 9): base template for the hostile
+     creature a permadead player is converted into. The PK/permadeath script
+     (data/scripts/campaign/creaturescripts/permadeath_convert.lua) clones
+     this monster with Game.createMonster("Player Shade", ...) and then
+     overrides its name/outfit to match the fallen player.
+     `look type` is a placeholder ghost outfit (id 0 = invisible/no sprite)
+     until a dedicated "shade" sprite is added to the client. -->
+<monster name="Player Shade" nameDescription="a restless shade" race="undead" experience="0" speed="120" manacost="0" raceId="0">
+	<health now="80" max="80" />
+	<look type="0" corpse="0" />
+	<targetchange interval="4000" chance="8" />
+	<flags>
+		<flag summonable="0" />
+		<flag attackable="1" />
+		<flag hostile="1" />
+		<flag illusionable="0" />
+		<flag convinceable="0" />
+		<flag pushable="0" />
+		<flag canpushitems="0" />
+		<flag canpushcreatures="0" />
+		<flag targetdistance="1" />
+		<flag staticattack="90" />
+		<flag runonhealth="0" />
+		<flag canwalkonenergy="1" />
+		<flag canwalkonfire="1" />
+		<flag canwalkonpoison="1" />
+	</flags>
+	<attacks>
+		<attack name="melee" interval="2000" min="0" max="-25" />
+		<attack name="lifedrain" interval="4000" chance="20" range="1" min="-10" max="-20" />
+	</attacks>
+	<defenses armor="8" defense="10" />
+	<elements>
+		<element holyPercent="-50" />
+		<element deathPercent="25" />
+	</elements>
+	<immunities>
+		<immunity death="1" />
+		<immunity drown="1" />
+		<immunity lifedrain="1" />
+		<immunity poison="1" />
+		<immunity invisible="1" />
+	</immunities>
+	<voices interval="6000" chance="15">
+		<voice sentence="...you took everything..." />
+		<voice sentence="*a cold whisper*" />
+	</voices>
+	<loot>
+	</loot>
+</monster>
