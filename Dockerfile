@@ -37,5 +37,4 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 7171 7172
 WORKDIR /srv
-VOLUME /srv
 ENTRYPOINT ["docker-entrypoint.sh"]
