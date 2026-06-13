@@ -1,6 +1,7 @@
 -- Campaign MVP configuration
--- Shared constants for the Hunger, Magic (Grimoire/Rune), Durability and
--- Corpse & Undead systems described in docs/GDD-CoreSystems.md
+-- Shared constants for the Hunger, Magic (Grimoire/Rune), Durability,
+-- Crafting/Gathering and Death/Permadeath systems described in
+-- docs/GDD-CoreSystems.md
 
 CampaignConfig = {
 	hunger = {
@@ -68,22 +69,6 @@ CampaignConfig = {
 		[2787] = 200, -- dragon broth (magical tier)
 	},
 
-	-- Corpse & Undead system
-	corpse = {
-		-- corpse itemId -> { undeadName = "monster name in monsters/", riseAfter = seconds }
-		-- IDs match the corpse drops of the engine's built-in Rat, Troll and
-		-- Bandit monsters, so killing those creatures feeds this system.
-		rules = {
-			[5964] = { undeadName = "Skeleton Rat", riseAfter = 240 }, -- rat corpse
-			[20331] = { undeadName = "Skeleton", riseAfter = 300 }, -- human/bandit corpse
-			[5960] = { undeadName = "Troll Bones", riseAfter = 300 }, -- troll corpse
-		},
-		-- item attribute key (string) set on the corpse once it has been burned
-		burnedAttribute = "campaign_burned",
-		-- itemIds that can be used to burn a corpse (torches)
-		burningTools = { 2050, 2051, 2052 },
-	},
-
 	-- Crafting & Resources (GDD section 7/8): each station is a tile/item in
 	-- the world with the listed actionId. A player "uses" a recipe item on
 	-- the station to craft. See data/scripts/campaign/actions/cooking_fire.lua,
@@ -106,7 +91,7 @@ CampaignConfig = {
 		workbenchActionId = 9103,
 		-- itemId used on the bench -> { result, resultCount, consumedCount, materials = { [itemId] = count } }
 		workbenchRecipes = {
-			-- 2 logs -> 1 torch (torches are CampaignConfig.corpse.burningTools)
+			-- 2 logs -> 1 torch (light source for dark areas)
 			[5942] = { result = 2050, resultCount = 1, consumedCount = 2, materials = {} },
 		},
 	},
@@ -149,20 +134,5 @@ CampaignConfig = {
 		maxPhase = 3,
 		-- access level required to change the phase (2 = GM by default in TFS)
 		gmAccessLevel = 2,
-	},
-
-	-- Boss System (GDD section 11): a simple "auto boss" that periodically
-	-- has a chance to spawn if no instance of it is currently alive. See
-	-- data/scripts/campaign/globalevents/auto_boss.lua,
-	-- creaturescripts/boss_death.lua and
-	-- data/monster/monsters/grakthar_the_bonecaller.xml.
-	boss = {
-		name = "Grakthar the Bonecaller",
-		intervalMs = 30 * 60 * 1000, -- check every 30 minutes
-		spawnChance = 10, -- 10% chance per check while no boss is alive
-		-- placeholder arena coordinates - point this at the campaign's boss room
-		spawnPosition = { x = 1000, y = 1010, z = 7 },
-		-- Game.getStorageValue flag: 1 while this boss is alive
-		aliveStorage = 60040,
 	},
 }
