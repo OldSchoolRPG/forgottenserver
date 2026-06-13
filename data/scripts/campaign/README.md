@@ -5,6 +5,11 @@ This folder contains the first playable slice of the systems described in
 of the implementation roadmap), built on top of TFS's revscriptsys
 (`data/scripts/`).
 
+The initial MVP intentionally targets a simple, classic "Rookgard-style"
+starting experience (basic hunger, equipment, magic, crafting and gathering
+loops). The Corpse & Undead system and the world Boss system from the GDD are
+**deferred** - see [Deferred systems](#deferred-systems-future-work) below.
+
 ## Contents
 
 | File | System | GDD Section |
@@ -15,8 +20,6 @@ of the implementation roadmap), built on top of TFS's revscriptsys
 | `actions/eat_food.lua` | Eating food restores food ticks | 4, 7 |
 | `creaturescripts/campaign_login.lua` | Initializes hunger storage on login | 4 |
 | `actions/repair.lua` | Repairing equipment at an anvil | 5 |
-| `creaturescripts/corpse_rise.lua` | Unburned corpses rise as undead | 6 |
-| `actions/burn_corpse.lua` | Burning a corpse prevents it from rising | 6 |
 | `actions/grimoire.lua` | Reading a grimoire permanently learns a spell | 3 |
 | `talkactions/rune_inscribe.lua` | `!inscribe <Spell>` crafts a charged rune | 3 |
 | `spells/fireball.lua` | New instant spell "Fireball" (grimoire 8916) | 3 |
@@ -29,23 +32,20 @@ of the implementation roadmap), built on top of TFS's revscriptsys
 | `creaturescripts/permadeath_convert.lua` | On death, drops equipment and converts the character into a "Player Shade" | 9 |
 | `creaturescripts/permadeath_login.lua` | Banishes a "shade" character to limbo on next login | 9 |
 | `talkactions/campaign_phase.lua` | `!campaignphase [0-3]` GM command to view/advance the world campaign phase | 10 |
-| `globalevents/auto_boss.lua` | Periodically spawns "Grakthar the Bonecaller" if not already alive | 11 |
-| `creaturescripts/boss_death.lua` | Resets the boss "alive" flag and announces its defeat | 11 |
 
 ## New monsters (`data/monster/monsters/`)
 
 | Monster | Used by |
 |---|---|
-| `skeleton_rat.xml` | Rises from an unburned rat corpse (item 5964) |
-| `troll_bones.xml` | Rises from an unburned troll corpse (item 5960) |
 | `player_shade.xml` | Hostile monster a player permanently turns into on death (Death & Permadeath, GDD section 9) |
 | `familiar.xml` | Summoned by "Summon Familiar" |
-| `grakthar_the_bonecaller.xml` | World boss, periodically spawned by `globalevents/auto_boss.lua` (GDD section 11) |
 
-The built-in `Skeleton` monster (already in the engine) now also rises from
-unburned human/bandit corpses (item 20331). All five are registered at the
-bottom of `data/monster/monsters.xml` under a "Campaign MVP additions"
-comment.
+`skeleton_rat.xml` and `troll_bones.xml` (originally created for the deferred
+Corpse & Undead system) and `grakthar_the_bonecaller.xml` (the deferred world
+boss) remain in `data/monster/monsters/` for future use but are **not**
+registered in `data/monster/monsters.xml`, so they will not load or spawn.
+The four active monsters above are registered at the bottom of
+`data/monster/monsters.xml` under a "Campaign MVP additions" comment.
 
 ## New NPCs (`data/npc/`, scripts in `data/npc/scripts/campaign/`)
 
@@ -121,21 +121,24 @@ The active phase is a **world-global** counter (`Game.getStorageValue` /
   the same global storage value via `{chronicle}`/`{phase}`/`{news}` and
   reports the matching entry from its `PHASES` table.
 
-## Boss system (GDD section 11)
+## Deferred systems (future work)
 
-A simple "auto boss" loop built on the same world-global storage pattern:
+Two systems from `docs/GDD-CoreSystems.md` were removed from the initial MVP
+to keep the first playable loop close to a classic Rookgard-style experience.
+Both can be reintroduced later without touching the systems above:
 
-- `globalevents/auto_boss.lua` runs every `boss.intervalMs` (default 30 min).
-  If `boss.aliveStorage` is not set, it rolls `boss.spawnChance` (default 10%)
-  and, on success, spawns `boss.name` ("Grakthar the Bonecaller") at
-  `boss.spawnPosition` (placeholder coordinates), sets the alive flag, and
-  registers `creaturescripts/boss_death.lua` on that monster instance.
-- `creaturescripts/boss_death.lua` (`type("death")`) clears the alive flag
-  when the boss with that name dies and announces its defeat, allowing
-  `auto_boss.lua` to spawn it again later.
-- `data/monster/monsters/grakthar_the_bonecaller.xml` - an undead boss
-  (~2000 HP, melee/lifedrain/area attacks, undead immunities) that drops gold,
-  crystal coins, bones, and a "heavy old tome" (item 26642).
+- **Corpse & Undead system (GDD section 6)** - previously, unburned monster
+  corpses would rise as undead (`creaturescripts/corpse_rise.lua`), and
+  torches could burn a corpse to prevent that (`actions/burn_corpse.lua`).
+  Both scripts and the `CampaignConfig.corpse` table were removed; the
+  `skeleton_rat.xml` / `troll_bones.xml` monster files remain unregistered in
+  `data/monster/monsters/` for future use. The implementation can be found in
+  this repo's git history if needed as a starting point.
+- **Boss system (GDD section 11)** - previously, `globalevents/auto_boss.lua`
+  periodically spawned a world boss ("Grakthar the Bonecaller"), tracked via
+  `creaturescripts/boss_death.lua` and `CampaignConfig.boss`. Both scripts and
+  the config table were removed; `grakthar_the_bonecaller.xml` remains
+  unregistered in `data/monster/monsters/` for future use.
 
 ## Load order
 
@@ -168,14 +171,6 @@ forked at `OldSchoolRPG/forgottenserver`):
    `exura vita mas`, `utori familiaris`) were chosen to avoid colliding with
    the engine's built-in spell list, but were not verified against a running
    build.
-4. **`Creature:registerEvent("CampaignBossDeath")`** (`globalevents/auto_boss.lua`)
-   - confirm this method exists on the monster userdata returned by
-   `Game.createMonster` in your engine build; if not, register
-   `boss_death.lua` globally (`type("death")`) and filter by
-   `creature:getName()` as it already does.
-5. **`<flag isboss="1" />`** (`monster/monsters/grakthar_the_bonecaller.xml`) -
-   optional in most TFS 1.x builds; remove it if your engine's monster loader
-   rejects unknown flags.
 
 ## Item/asset IDs
 
