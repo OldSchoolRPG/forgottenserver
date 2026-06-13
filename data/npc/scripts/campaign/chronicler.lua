@@ -35,8 +35,7 @@ function creatureSayCallback(cid, type, msg)
 	end
 
 	if msgcontains(msg, 'chronicle') or msgcontains(msg, 'phase') or msgcontains(msg, 'news') then
-		local player = Player(cid)
-		local phase = player:getStorageValue(CAMPAIGN_PHASE_STORAGE)
+		local phase = Game.getStorageValue(CAMPAIGN_PHASE_STORAGE)
 		if phase < 0 then
 			phase = 0
 		end
