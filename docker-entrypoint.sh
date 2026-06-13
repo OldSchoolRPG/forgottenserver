@@ -8,7 +8,7 @@ cd /srv
 
 cp config.lua.dist config.lua
 
-cat >> config.lua <<EOF
+cat >> config.lua <<EOF2
 
 -- ---------------------------------------------------------------------
 -- Environment overrides (docker-entrypoint.sh). Lua re-assignment wins,
@@ -23,9 +23,12 @@ ip = "${SERVER_IP:-127.0.0.1}"
 bindOnlyGlobalAddress = false
 serverName = "${SERVER_NAME:-OldSchool Campaign}"
 worldType = "${WORLD_TYPE:-pvp}"
-EOF
+EOF2
 
-MYSQL_ARGS="-h ${MYSQL_HOST:-127.0.0.1} -P ${MYSQL_PORT:-3306} -u ${MYSQL_USER:-forgottenserver}"
+# Railway's managed MySQL presents a self-signed cert; the mariadb CLI
+# verifies certs by default and fails the handshake, so disable TLS for
+# these bootstrap checks (TFS itself already disables SSL verification).
+MYSQL_ARGS="-h ${MYSQL_HOST:-127.0.0.1} -P ${MYSQL_PORT:-3306} -u ${MYSQL_USER:-forgottenserver} --ssl=0"
 if [ -n "$MYSQL_PASSWORD" ]; then
 	MYSQL_ARGS="$MYSQL_ARGS -p$MYSQL_PASSWORD"
 fi
