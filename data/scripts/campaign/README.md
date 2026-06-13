@@ -22,6 +22,15 @@ of the implementation roadmap), built on top of TFS's revscriptsys
 | `spells/fireball.lua` | New instant spell "Fireball" (grimoire 8916) | 3 |
 | `spells/mass_healing.lua` | New instant spell "Mass Healing" (grimoire 8917), 3x3 AoE heal | 3 |
 | `spells/summon_familiar.lua` | New instant spell "Summon Familiar" (grimoire 8918) | 3 |
+| `actions/cooking_fire.lua` | Cooking raw food at a cooking-fire station | 7 |
+| `actions/alchemy_table.lua` | Combining ingredients into special foods at an alchemy table | 7 |
+| `actions/workbench.lua` | Crafting tools/items (e.g. logs -> torches) at a workbench | 7, 8 |
+| `actions/gather_resource.lua` | Harvesting resource nodes (ore veins, trees, herb patches) | 8 |
+| `creaturescripts/permadeath_convert.lua` | On death, drops equipment and converts the character into a "Player Shade" | 9 |
+| `creaturescripts/permadeath_login.lua` | Banishes a "shade" character to limbo on next login | 9 |
+| `talkactions/campaign_phase.lua` | `!campaignphase [0-3]` GM command to view/advance the world campaign phase | 10 |
+| `globalevents/auto_boss.lua` | Periodically spawns "Grakthar the Bonecaller" if not already alive | 11 |
+| `creaturescripts/boss_death.lua` | Resets the boss "alive" flag and announces its defeat | 11 |
 
 ## New monsters (`data/monster/monsters/`)
 
@@ -29,11 +38,12 @@ of the implementation roadmap), built on top of TFS's revscriptsys
 |---|---|
 | `skeleton_rat.xml` | Rises from an unburned rat corpse (item 5964) |
 | `troll_bones.xml` | Rises from an unburned troll corpse (item 5960) |
-| `player_shade.xml` | Base template for the Death & Permadeath system (GDD section 9, upcoming) |
+| `player_shade.xml` | Hostile monster a player permanently turns into on death (Death & Permadeath, GDD section 9) |
 | `familiar.xml` | Summoned by "Summon Familiar" |
+| `grakthar_the_bonecaller.xml` | World boss, periodically spawned by `globalevents/auto_boss.lua` (GDD section 11) |
 
 The built-in `Skeleton` monster (already in the engine) now also rises from
-unburned human/bandit corpses (item 20331). All four are registered at the
+unburned human/bandit corpses (item 20331). All five are registered at the
 bottom of `data/monster/monsters.xml` under a "Campaign MVP additions"
 comment.
 
@@ -55,6 +65,77 @@ Each NPC has a `{trade}`/keyword-driven shop and dialogue:
 
 All NPC `look` outfit ids are placeholder "citizen/worker/mage" type ids -
 replace with campaign-specific NPC sprites later.
+
+## Crafting stations (GDD section 7/8)
+
+Each station is just a tile/item placed in the world with a specific
+`actionId` (set in the map editor or via item attributes). A player "uses" a
+recipe item on the station; the recipe tables live in
+`CampaignConfig.crafting`, so new recipes never require script changes:
+
+| Station | actionId | Recipes (`campaign_config.lua`) | Script |
+|---|---|---|---|
+| Cooking fire | 9101 | `crafting.cookingRecipes`: raw food -> cooked food (timed) | `actions/cooking_fire.lua` |
+| Alchemy table | 9102 | `crafting.alchemyRecipes`: item + materials -> result | `actions/alchemy_table.lua` |
+| Workbench | 9103 | `crafting.workbenchRecipes`: consume N of an item (+materials) -> result | `actions/workbench.lua` |
+
+## Resource gathering (GDD section 8)
+
+World tiles/items carry one of the `actionId`s listed in
+`CampaignConfig.gathering.nodes`. Using the node (`actions/gather_resource.lua`)
+checks for a required tool (if any), yields a random amount of the node's
+item, and starts a `respawnSeconds` cooldown tracked via a custom item
+attribute (`campaign_depleted_until`):
+
+| actionId | Node | Tool required | Yields |
+|---|---|---|---|
+| 9201 | Iron vein | Pickaxe (5710) | Iron ore (5910), feeds `repair.lua` |
+| 9202 | Tree | Hatchet (2550) | Logs (5942), feeds `workbench.lua` (-> torches) |
+| 9203 | Herb patch | None | Cooking herb (2789) |
+
+## Death & Permadeath / PK system (GDD section 9)
+
+Controlled by `CampaignConfig.permadeath`. By default `pvpOnly = true`, so
+normal PvE deaths use the engine's usual respawn rules.
+
+1. `creaturescripts/permadeath_convert.lua` (`type("death")`) - if the killer
+   is another player, drops the victim's entire equipment at the death
+   position, flags the character (`shadeStorage`), and spawns a hostile
+   `Player Shade` monster in their place.
+2. `creaturescripts/permadeath_login.lua` (`type("login")`) - on every
+   subsequent login, a flagged character is teleported to
+   `permadeath.shadePosition` (placeholder coordinates - point this at a
+   dedicated limbo/spectator area) and told the character has permanently
+   perished.
+
+## Campaign phase system (GDD section 10)
+
+The active phase is a **world-global** counter (`Game.getStorageValue` /
+`Game.setStorageValue`, storage key `CampaignConfig.campaignPhase.storage` =
+60020) - not per-player.
+
+- `talkactions/campaign_phase.lua` - `!campaignphase` (GM-only, access level
+  >= `campaignPhase.gmAccessLevel`) reports the current phase; `!campaignphase
+  <0-3>` sets it and broadcasts a notice to all online players.
+- `npc/scripts/campaign/chronicler.lua` - the Town Hall Chronicler NPC reads
+  the same global storage value via `{chronicle}`/`{phase}`/`{news}` and
+  reports the matching entry from its `PHASES` table.
+
+## Boss system (GDD section 11)
+
+A simple "auto boss" loop built on the same world-global storage pattern:
+
+- `globalevents/auto_boss.lua` runs every `boss.intervalMs` (default 30 min).
+  If `boss.aliveStorage` is not set, it rolls `boss.spawnChance` (default 10%)
+  and, on success, spawns `boss.name` ("Grakthar the Bonecaller") at
+  `boss.spawnPosition` (placeholder coordinates), sets the alive flag, and
+  registers `creaturescripts/boss_death.lua` on that monster instance.
+- `creaturescripts/boss_death.lua` (`type("death")`) clears the alive flag
+  when the boss with that name dies and announces its defeat, allowing
+  `auto_boss.lua` to spawn it again later.
+- `data/monster/monsters/grakthar_the_bonecaller.xml` - an undead boss
+  (~2000 HP, melee/lifedrain/area attacks, undead immunities) that drops gold,
+  crystal coins, bones, and a "heavy old tome" (item 26642).
 
 ## Load order
 
@@ -83,6 +164,14 @@ forked at `OldSchoolRPG/forgottenserver`):
    `exura vita mas`, `utori familiaris`) were chosen to avoid colliding with
    the engine's built-in spell list, but were not verified against a running
    build.
+4. **`Creature:registerEvent("CampaignBossDeath")`** (`globalevents/auto_boss.lua`)
+   - confirm this method exists on the monster userdata returned by
+   `Game.createMonster` in your engine build; if not, register
+   `boss_death.lua` globally (`type("death")`) and filter by
+   `creature:getName()` as it already does.
+5. **`<flag isboss="1" />`** (`monster/monsters/grakthar_the_bonecaller.xml`) -
+   optional in most TFS 1.x builds; remove it if your engine's monster loader
+   rejects unknown flags.
 
 ## Item/asset IDs
 
