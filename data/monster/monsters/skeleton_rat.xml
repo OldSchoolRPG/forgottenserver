@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Corpse & Undead System (GDD section 6): rises from an unburned rat
+     corpse (item 5964) via creaturescripts/corpse_rise.lua. `look type`
+     reuses the built-in Skeleton outfit (33) as a placeholder until a
+     dedicated "skeleton rat" sprite is added to the client. -->
+<monster name="Skeleton Rat" nameDescription="a skeleton rat" race="undead" experience="25" speed="160" manacost="0" raceId="0">
+	<health now="30" max="30" />
+	<look type="33" corpse="5972" />
+	<targetchange interval="4000" chance="0" />
+	<flags>
+		<flag summonable="0" />
+		<flag attackable="1" />
+		<flag hostile="1" />
+		<flag illusionable="1" />
+		<flag convinceable="0" />
+		<flag pushable="1" />
+		<flag canpushitems="0" />
+		<flag canpushcreatures="0" />
+		<flag targetdistance="1" />
+		<flag staticattack="90" />
+		<flag runonhealth="0" />
+		<flag canwalkonenergy="0" />
+		<flag canwalkonfire="0" />
+		<flag canwalkonpoison="1" />
+	</flags>
+	<attacks>
+		<attack name="melee" interval="2000" min="0" max="-12" />
+	</attacks>
+	<defenses armor="3" defense="3" />
+	<elements>
+		<element holyPercent="-25" />
+		<element deathPercent="10" />
+	</elements>
+	<immunities>
+		<immunity death="1" />
+		<immunity drown="1" />
+		<immunity lifedrain="1" />
+		<immunity poison="1" />
+	</immunities>
+	<voices interval="5000" chance="10">
+		<voice sentence="*rattles*" />
+	</voices>
+	<loot>
+		<item id="2230" name="bone" chance="60000" />
+		<item id="2148" name="gold coin" chance="30000" countmax="5" />
+	</loot>
+</monster>
