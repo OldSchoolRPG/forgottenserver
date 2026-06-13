@@ -83,4 +83,86 @@ CampaignConfig = {
 		-- itemIds that can be used to burn a corpse (torches)
 		burningTools = { 2050, 2051, 2052 },
 	},
+
+	-- Crafting & Resources (GDD section 7/8): each station is a tile/item in
+	-- the world with the listed actionId. A player "uses" a recipe item on
+	-- the station to craft. See data/scripts/campaign/actions/cooking_fire.lua,
+	-- alchemy_table.lua and workbench.lua.
+	crafting = {
+		cookingFireActionId = 9101,
+		-- raw food itemId -> { result = cookedItemId, cookTimeMs = ms }
+		cookingRecipes = {
+			[2666] = { result = 2667, cookTimeMs = 4000 }, -- meat -> roasted meat (food tier: raw)
+			[2671] = { result = 2696, cookTimeMs = 6000 }, -- ham -> meat stew (food tier: cooked)
+		},
+
+		alchemyTableActionId = 9102,
+		-- itemId used on the table -> { result, resultCount, materials = { [itemId] = count } }
+		alchemyRecipes = {
+			-- empty potion flask + roasted meat + bread = hunter's feast
+			[7636] = { result = 2693, resultCount = 1, materials = { [2667] = 1, [2689] = 1 } },
+		},
+
+		workbenchActionId = 9103,
+		-- itemId used on the bench -> { result, resultCount, consumedCount, materials = { [itemId] = count } }
+		workbenchRecipes = {
+			-- 2 logs -> 1 torch (torches are CampaignConfig.corpse.burningTools)
+			[5942] = { result = 2050, resultCount = 1, consumedCount = 2, materials = {} },
+		},
+	},
+
+	-- Resource Gathering (GDD section 8): world tiles/items carry one of
+	-- these actionIds. Using the node yields an item, optionally requires a
+	-- tool in the player's inventory, and then needs `respawnSeconds` to
+	-- recover. See data/scripts/campaign/actions/gather_resource.lua.
+	gathering = {
+		nodes = {
+			[9201] = { name = "iron vein", tool = 5710, yield = 5910, yieldMin = 1, yieldMax = 3, respawnSeconds = 300 }, -- pickaxe -> iron ore (used by repair.lua)
+			[9202] = { name = "tree", tool = 2550, yield = 5942, yieldMin = 1, yieldMax = 2, respawnSeconds = 180 }, -- hatchet -> logs (used by workbench)
+			[9203] = { name = "herb patch", tool = nil, yield = 2789, yieldMin = 1, yieldMax = 1, respawnSeconds = 240 }, -- no tool -> cooking herb
+		},
+	},
+
+	-- Death & Permadeath / PK System (GDD section 9). See
+	-- data/scripts/campaign/creaturescripts/permadeath_convert.lua and
+	-- permadeath_login.lua.
+	permadeath = {
+		enabled = true,
+		-- if true, only PvP kills (mostDamageKiller is a player) trigger
+		-- permadeath; ordinary PvE deaths use the engine's normal death rules.
+		pvpOnly = true,
+		-- storage value flag set on a character once it has permanently died
+		shadeStorage = 60030,
+		-- where permadead characters are teleported on next login. Placeholder
+		-- coordinates - point this at a dedicated "shade limbo"/spectator area.
+		shadePosition = { x = 1000, y = 1000, z = 7 },
+	},
+
+	-- Campaign Phase System (GDD section 10). Stored via Game.getStorageValue
+	-- / Game.setStorageValue (world-global, not per-player).
+	-- CAMPAIGN_PHASE_STORAGE is declared globally by
+	-- data/npc/scripts/campaign/chronicler.lua; the talkaction
+	-- (data/scripts/campaign/talkactions/campaign_phase.lua) lets GMs
+	-- advance/inspect it.
+	campaignPhase = {
+		storage = 60020,
+		maxPhase = 3,
+		-- access level required to change the phase (2 = GM by default in TFS)
+		gmAccessLevel = 2,
+	},
+
+	-- Boss System (GDD section 11): a simple "auto boss" that periodically
+	-- has a chance to spawn if no instance of it is currently alive. See
+	-- data/scripts/campaign/globalevents/auto_boss.lua,
+	-- creaturescripts/boss_death.lua and
+	-- data/monster/monsters/grakthar_the_bonecaller.xml.
+	boss = {
+		name = "Grakthar the Bonecaller",
+		intervalMs = 30 * 60 * 1000, -- check every 30 minutes
+		spawnChance = 10, -- 10% chance per check while no boss is alive
+		-- placeholder arena coordinates - point this at the campaign's boss room
+		spawnPosition = { x = 1000, y = 1010, z = 7 },
+		-- Game.getStorageValue flag: 1 while this boss is alive
+		aliveStorage = 60040,
+	},
 }
