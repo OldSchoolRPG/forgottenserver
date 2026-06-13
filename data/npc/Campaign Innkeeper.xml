@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- World Map Design (GDD section 15): Inn / Innkeeper.
+     `look` values are placeholder Citizen-type outfits until the campaign
+     defines its own NPC sprites. -->
+<npc name="Innkeeper" script="campaign/innkeeper.lua" walkinterval="2000" floorchange="0">
+	<health now="100" max="100" />
+	<look type="128" head="78" body="39" legs="86" feet="20" addons="0" />
+</npc>
