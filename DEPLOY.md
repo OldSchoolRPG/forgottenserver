@@ -57,6 +57,29 @@ short-lived prototype this is usually fine, but if it becomes a problem,
 a host with a static IPv4 (e.g. Fly.io with `fly ips allocate-v4`) is more
 stable for this protocol.
 
+
+**Modern clients (protocol 1281+, e.g. OTClient Redemption / 13.x):** these
+clients log in over HTTP(S) instead of the raw `7171` protocol, and the
+server's HTTP login response tells the client which address/port to use for
+the game-world connection. Because changing a TCP proxy's internal target
+port causes Railway to assign a **new external port**, the internal game
+port (bound by TFS, must match the TCP proxy's internal target) and the
+external port (reported to clients, must match the TCP proxy's public port)
+can end up different. Two env vars handle this:
+
+- `GAME_PORT` - the port TFS binds `ProtocolGame` on internally. Set this to
+  match the TCP proxy's **internal target** port.
+- `GAME_PORT_EXTERNAL` - the port reported to clients in the HTTP login
+  response (`externalportprotected`/`externalportunprotected`). Set this to
+  the TCP proxy's **public** port (the number after `:` in
+  `<something>.proxy.rlwy.net:<port>`). Defaults to `GAME_PORT` if unset.
+
+For the HTTP login itself, you can reuse the service's existing public HTTPS
+domain (Settings -> Networking -> Public Networking, mapped to port `8080`)
+as the client's "Server Address" - no extra TCP proxy needed for login.
+Note that HTTP login looks up accounts by the `email` column, not `name`, so
+test accounts need a non-empty `email` value.
+
 ## 4. First login / creating a GM account
 
 TFS has no built-in signup UI. For testing, insert an account directly via
