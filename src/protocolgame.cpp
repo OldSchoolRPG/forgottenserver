@@ -446,11 +446,6 @@ void ProtocolGame::onRecvFirstMessage(NetworkMessage& msg)
 		return;
 	}
 
-	Connection::Address sessionIP = boost::asio::ip::make_address(result->getString("session_ip"));
-	if (!sessionIP.is_loopback() && ip != sessionIP) {
-		disconnectClient("Your game session is already locked to a different IP. Please log in again.");
-	}
-
 	g_dispatcher.addTask([=, thisPtr = getThis(), characterId = result->getNumber<uint32_t>("character_id")]() {
 		thisPtr->login(characterId, accountId, operatingSystem);
 	});
