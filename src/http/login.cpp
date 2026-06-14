@@ -130,9 +130,9 @@ std::pair<status, json::value> tfs::http::handle_login(const json::object& body,
 	        {"id", 0}, // not implemented
 	        {"name", getString(ConfigManager::SERVER_NAME)},
 	        {"externaladdressprotected", getString(ConfigManager::IP)},
-	        {"externalportprotected", getNumber(ConfigManager::GAME_PORT)},
+	        {"externalportprotected", getNumber(ConfigManager::GAME_PORT_EXTERNAL)},
 	        {"externaladdressunprotected", getString(ConfigManager::IP)},
-	        {"externalportunprotected", getNumber(ConfigManager::GAME_PORT)},
+	        {"externalportunprotected", getNumber(ConfigManager::GAME_PORT_EXTERNAL)},
 	        {"previewstate", 0}, // not implemented
 	        {"location", getString(ConfigManager::LOCATION)},
 	        {"anticheatprotection", false}, // not implemented
