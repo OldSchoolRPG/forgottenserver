@@ -21,6 +21,7 @@ mysqlDatabase = "${MYSQL_DATABASE:-forgottenserver}"
 mysqlPort = ${MYSQL_PORT:-3306}
 ip = "${SERVER_IP:-127.0.0.1}"
 gameProtocolPort = ${GAME_PORT:-7172}
+gameProtocolPortExternal = ${GAME_PORT_EXTERNAL:-${GAME_PORT:-7172}}
 bindOnlyGlobalAddress = false
 serverName = "${SERVER_NAME:-OldSchool Campaign}"
 worldType = "${WORLD_TYPE:-pvp}"
